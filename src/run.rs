@@ -125,19 +125,40 @@ explore all
                 .as_bytes(),
             )?;
 
-            let binsec_cmd = format!(
-    "binsec -sse -checkct -sse-depth 1000000000 -sse-jump-enum 64 -sse-script {} -sse-timeout {} -arm-supported-modes thumb {}",
-    dir.join("target").join(target).join(format!("{driver}.binsec")).to_string_lossy(),
-    timeout.as_secs(),
-    dir.join("target").join(target).join("release").join(&driver).to_string_lossy(),
-);
+            let mut binsec_cmd = std::process::Command::new("binsec");
+            binsec_cmd
+                .arg("-sse")
+                .arg("-checkct")
+                .arg("-sse-depth")
+                .arg("1000000000")
+                .arg("-sse-jump-enum")
+                .arg("64")
+                .arg("-sse-script")
+                .arg(format!(
+                    "{}",
+                    dir.join("target")
+                        .join(target)
+                        .join(format!("{driver}.binsec"))
+                        .to_string_lossy()
+                ))
+                .arg("-sse-timeout")
+                .arg(format!("{}", timeout.as_secs()))
+                .arg("-arm-supported-modes")
+                .arg("thumb")
+                .arg(format!(
+                    "{}",
+                    dir.join("target")
+                        .join(target)
+                        .join("release")
+                        .join(&driver)
+                        .to_string_lossy()
+                ));
 
-            println!("Running: {binsec_cmd}");
-            let output = std::process::Command::new("sh")
-                .arg("-c")
-                .arg(&binsec_cmd)
-                .output()
-                .context("Failed to run binsec")?;
+            println!(
+                "{}",
+                format!("  Running: {:?}", binsec_cmd).replace('\"', "")
+            );
+            let output = binsec_cmd.output().context("Failed to run binsec")?;
 
             if !output.status.success() {
                 bail!(
