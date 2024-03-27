@@ -9,9 +9,9 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<()> {
 
     // First we need to actually build the drivers
     std::env::set_current_dir(dir)?;
-    let output = std::process::Command::new("sh")
-        .arg("-c")
-        .arg("cargo build --release")
+    let output = std::process::Command::new("cargo")
+        .arg("build")
+        .arg("--release")
         .output()
         .context("Failed to build drivers")?;
 
