@@ -6,7 +6,6 @@
 /examples/masked_aes/checkct/target
 /unisim_archisec
 /binsec
-Dockerfile
 
 # Added by cargo
 
