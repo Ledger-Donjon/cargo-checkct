@@ -17,9 +17,6 @@ pub fn init_workspace(path: &Path, name: &str) -> Result<()> {
 
     // The workspace directory name is hardcoded to /checkct
     let workspace_dir = path.join("checkct");
-
-    // Create the workspace directory structure
-    fs::create_dir_all(workspace_dir.join(name).join("src"))?;
     fs::create_dir_all(workspace_dir.join(".cargo"))?;
 
     // Create the rust-toolchain.toml file
@@ -47,6 +44,15 @@ panic = "abort""#,
         )
         .as_bytes(),
     )?;
+
+    create_driver(&workspace_dir, &lib_name, name)?;
+
+    Ok(())
+}
+
+pub fn create_driver(workspace_dir: &Path, lib_name: &str, name: &str) -> Result<()> {
+    // Create the crate's directory structure
+    fs::create_dir_all(workspace_dir.join(name).join("src"))?;
 
     // Create the driver Cargo.toml file
     let mut driver_cargo_file = fs::File::create(workspace_dir.join(name).join("Cargo.toml"))?;
