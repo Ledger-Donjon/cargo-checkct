@@ -4,8 +4,8 @@ version = "0.0.0"
 publish = false
 edition = "2021"
 
-[dependencies.dalek]
-path = "../.."
-
 [dependencies]
 rand_core = "0.6.4"
+
+[dependencies.dalek]
+path = "../.."
