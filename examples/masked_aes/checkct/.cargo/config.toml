@@ -1,0 +1,7 @@
+[build]
+target = ["thumbv7em-none-eabihf"]
+
+[unstable]
+unstable-options = true
+build-std = ["core", "panic_abort"]
+build-std-features = ["panic_immediate_abort", "compiler-builtins-mem"]

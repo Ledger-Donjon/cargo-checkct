@@ -1,0 +1,3 @@
+[submodule "examples/masked_aes/better_cortexm"]
+	path = examples/masked_aes/better_cortexm
+	url = https://github.com/NicsTr/better_cortexm

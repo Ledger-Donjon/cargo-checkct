@@ -1,0 +1,13 @@
+/.DS_Store
+/tests/vulnerable_eq/checkct/target
+/tests/subtle_eq/checkct/target
+/examples/dalek/checkct/target
+/examples/chachapoly/checkct/target
+/examples/masked_aes/checkct/target
+/unisim_archisec
+/binsec
+Dockerfile
+
+# Added by cargo
+
+/target

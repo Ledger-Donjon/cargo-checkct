@@ -1,0 +1,8 @@
+*.o
+*.a
+*.elf
+*.bin
+
+./build/*
+./test/build/*
+./lib/*

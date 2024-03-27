@@ -1,0 +1,7 @@
+[package]
+name = "subtle_eq"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+subtle = { version = "2.5.0", default-features = false }
