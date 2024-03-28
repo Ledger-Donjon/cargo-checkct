@@ -57,20 +57,27 @@ path = "../..""#
     // Create the config.toml file
     let mut config_file = fs::File::create(workspace_dir.join(".cargo").join("config.toml"))?;
     config_file.write_all(
-        r#"[build]
+        format!(
+            r#"[build]
 target = ["thumbv7em-none-eabihf", "riscv32imac-unknown-none-elf", "x86_64-unknown-linux-gnu"]
 
 [target.'cfg(target_os = "linux")']
 rustflags = ["-C", "link-arg=-nostartfiles"]
 
 [target.x86_64-unknown-linux-gnu]
-linker = "x86_64-unknown-linux-gnu-gcc"
+{linker}
 
 [unstable]
 unstable-options = true
 build-std = ["core", "panic_abort"]
-build-std-features = ["panic_immediate_abort", "compiler-builtins-mem"]"#
-            .as_bytes(),
+build-std-features = ["panic_immediate_abort", "compiler-builtins-mem"]"#,
+            linker = if cfg!(on_apple_silicon) {
+                "linker = \"x86_64-unknown-linux-gnu-gcc\""
+            } else {
+                ""
+            }
+        )
+        .as_bytes(),
     )?;
 
     // Create the driver's rng.rs file
