@@ -1,12 +1,6 @@
 [build]
 target = ["thumbv7em-none-eabihf"]
 
-[target.'cfg(target_os = "linux")']
-rustflags = ["-C", "link-arg=-nostartfiles"]
-
-[target.x86_64-unknown-linux-gnu]
-linker = "x86_64-unknown-linux-gnu-gcc"
-
 [unstable]
 unstable-options = true
 build-std = ["core", "panic_abort"]

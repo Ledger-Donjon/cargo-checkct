@@ -2,8 +2,6 @@ use std::fs;
 
 use assert_cmd::Command;
 
-// NB: to run, use "cargo test --test subtle_eq -- --exact --nocapture"
-
 #[test]
 fn subtle() {
     Command::cargo_bin("cargo-checkct")
@@ -21,11 +19,11 @@ fn subtle() {
 
     left.ct_eq(&right);"#;
 
-    let main_path = "tests/subtle_eq/checkct/driver/src/main.rs";
-    let mut main_file = fs::read_to_string(main_path).unwrap();
-    let idx = main_file.find("// USER CODE GOES HERE").unwrap();
-    main_file.insert_str(idx, user_code);
-    fs::write(main_path, main_file).unwrap();
+    let driver_path = "tests/subtle_eq/checkct/driver/src/driver.rs";
+    let mut driver_file = fs::read_to_string(driver_path).unwrap();
+    let idx = driver_file.find("// USER CODE GOES HERE").unwrap();
+    driver_file.insert_str(idx, user_code);
+    fs::write(driver_path, driver_file).unwrap();
 
     let output = Command::cargo_bin("cargo-checkct")
         .unwrap()
