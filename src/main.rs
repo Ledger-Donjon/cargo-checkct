@@ -4,6 +4,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 mod add;
+mod common;
 mod init;
 mod run;
 

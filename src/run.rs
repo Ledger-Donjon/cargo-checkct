@@ -1,8 +1,9 @@
 use std::{fs, io::Write, path::Path, time::Duration};
 
 use anyhow::{bail, Context, Result};
-use cargo_manifest::Manifest;
 use goblin::Object;
+
+use crate::common::get_workspace_members;
 
 pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<()> {
     let cur_dir = std::env::current_dir()?;
@@ -22,21 +23,14 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<()> {
             String::from_utf8_lossy(&output.stderr)
         )
     }
+    std::env::set_current_dir(cur_dir)?;
 
     // Next we recover the actual name of the drivers
-    let manifest = Manifest::from_path("Cargo.toml")
-        .with_context(|| format!("Failed to find the cargo manifest at: {dir:?}"))?;
-    let members = manifest
-        .workspace
-        .with_context(|| {
-            format!("Failed to find [workspace] entry in the cargo manifest at {dir:?}")
-        })?
-        .members;
+    let members = get_workspace_members(dir)?;
     assert!(
         !members.is_empty(),
         "Error: found empty [workspace.members] key - no drivers to build."
     );
-    std::env::set_current_dir(cur_dir)?;
 
     // Now for each driver:
     for driver in members {
