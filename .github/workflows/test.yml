@@ -1,0 +1,31 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rust-src
+      - name: install binsec
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgmp-dev gcc g++ opam
+          opam init -y
+          opam install -y dune dune-site menhir grain_dypgen ocamlgraph zarith toml bitwuzla
+          eval $(opam env)
+          git clone https://github.com/binsec/binsec
+          git clone https://github.com/binsec/unisim_archisec
+          pushd unisim_archisec && git apply ../unisim.patch && dune build @install && dune install && popd
+          pushd binsec && git apply ../binsec.patch && dune build @install && dune install && popd
+      - name: run tests
+        run: eval $(opam env) && cargo test
