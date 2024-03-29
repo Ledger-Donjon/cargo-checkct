@@ -5,7 +5,13 @@ use goblin::Object;
 
 use crate::common::get_workspace_members;
 
-pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<()> {
+pub enum Status {
+    Secure,
+    Insecure,
+    Unknown,
+}
+
+pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
     let cur_dir = std::env::current_dir()?;
 
     // First we need to actually build the drivers
@@ -31,6 +37,8 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<()> {
         !members.is_empty(),
         "Error: found empty [workspace.members] key - no drivers to build."
     );
+
+    let mut overall_status = Status::Secure;
 
     // Now for each driver:
     for driver in members {
@@ -154,6 +162,8 @@ explore all
             );
             let output = binsec_cmd.output().context("Failed to run binsec")?;
 
+            let driver_status;
+
             if !output.status.success() {
                 bail!(
                     "Error while running binsec:\nstdout: {}\nstderr: {}",
@@ -163,19 +173,34 @@ explore all
             } else {
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 if stdout.contains("[checkct:result] Program status is : insecure") {
-                    println!("INSECURE");
-                } else if !stdout.contains("[checkct:result] Program status is : secure") {
-                    panic!(
-                        "UNEXPECTED:\nstdout: {}\nstderr: {}",
-                        String::from_utf8_lossy(&output.stdout),
+                    driver_status = Status::Insecure;
+                } else if stdout.contains("[checkct:result] Program status is : secure") {
+                    driver_status = Status::Secure;
+                } else {
+                    println!(
+                        "UNEXPECTED:\nstderr: {}",
                         String::from_utf8_lossy(&output.stderr)
                     );
+                    driver_status = Status::Unknown;
                 }
             }
 
             println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+
+            match driver_status {
+                Status::Secure => {}
+                // If even one driver is not secure, fail, but still continue
+                // so that the status of the other drivers can be recovered
+                // from the logs.
+                Status::Insecure => {
+                    overall_status = Status::Insecure;
+                }
+                Status::Unknown => {
+                    overall_status = Status::Unknown;
+                }
+            }
         }
     }
 
-    Ok(())
+    Ok(overall_status)
 }

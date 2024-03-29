@@ -67,7 +67,17 @@ fn main() -> Result<()> {
         Command::Run { dir, timeout } => {
             let dir = dir.unwrap_or(std::env::current_dir()?).join("checkct");
             let timeout = timeout.unwrap_or(600);
-            run_binsec(&dir, Duration::from_secs(timeout))?;
+            match run_binsec(&dir, Duration::from_secs(timeout))? {
+                run::Status::Secure => {
+                    println!("SECURE");
+                }
+                run::Status::Insecure => {
+                    println!("INSECURE");
+                }
+                run::Status::Unknown => {
+                    println!("UNKNOWN");
+                }
+            }
         }
         Command::Add { dir, name } => {
             let dir = dir.unwrap_or(std::env::current_dir()?);
