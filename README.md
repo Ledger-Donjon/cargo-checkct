@@ -1,5 +1,14 @@
 # cargo-checkct
 
+cargo-checkct aims to make it easy for cryptography libraries developers and maintainers to formally verify that their code gets compiled down to constant-time machine code, in CI.
+
+It does so by leveraging [binsec](https://github.com/binsec/binsec), which is developed by the [Binsec team at the CEA](https://binsec.github.io/).
+
+There are, however, a number of limitations to have in mind if you plan on using cargo-checkct, most notably:
+
+- As currently designed, cargo-checkct focuses exclusively on `#![no_std]` libraries or features.
+- For the moment, only bare-metal `thumb` and `riscv32` are supported, as well as `x86_64-unknown-linux-gnu` (with some caveats, for instance the use of `cpuid` for runtime detection of cpu features, as used in [RustCrypto](https://github.com/RustCrypto/utils/tree/master/cpufeatures), is not supported). This is mainly due to gaps in the architecture coverage of binsec and [unisim_archisec](https://github.com/binsec/unisim_archisec), that may resorb in the future.
+
 ## Install
 
 You will need to install libgmp and gcc/g++ first, as well as opam (see <https://opam.ocaml.org/doc/Install.html>).
