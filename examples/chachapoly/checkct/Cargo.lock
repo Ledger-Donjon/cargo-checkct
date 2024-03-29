@@ -52,6 +52,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "chacha20poly"
+version = "0.0.0"
+dependencies = [
+ "chachapoly",
+ "rand_core",
+]
+
+[[package]]
 name = "chacha20poly1305"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -62,6 +70,14 @@ dependencies = [
  "cipher",
  "poly1305",
  "zeroize",
+]
+
+[[package]]
+name = "chacha8poly"
+version = "0.0.0"
+dependencies = [
+ "chachapoly",
+ "rand_core",
 ]
 
 [[package]]
@@ -106,14 +122,6 @@ dependencies = [
  "generic-array",
  "rand_core",
  "typenum",
-]
-
-[[package]]
-name = "driver"
-version = "0.0.0"
-dependencies = [
- "chachapoly",
- "rand_core",
 ]
 
 [[package]]
