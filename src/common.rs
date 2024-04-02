@@ -7,11 +7,13 @@ use cargo_manifest::Manifest;
 pub fn get_lib_name(path: &Path) -> Result<String> {
     let manifest = Manifest::from_path(path.join("Cargo.toml"))
         .with_context(|| format!("Failed to find the cargo manifest at: {path:?}"))?;
+
+    // We recover the package name directly, not the lib.name entry, because
+    // the latter has dashes '-' replaced with underscores '_', but we need the actual, unaltered name
     let lib_name = manifest
-        .lib
-        .with_context(|| format!("Failed to find [lib] entry in the cargo manifest at {path:?}"))?
-        .name
-        .with_context(|| format!("Failed to get crate name in the cargo manifest at {path:?}"))?;
+        .package
+        .with_context(|| format!("Failed to find package entry in the cargo manifest at {path:?}"))?
+        .name;
 
     Ok(lib_name)
 }
