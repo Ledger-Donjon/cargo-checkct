@@ -11,6 +11,13 @@ pub enum Status {
     Unknown,
 }
 
+struct Abi<'a> {
+    lr: &'a str,
+    ret: &'a str,
+    thumb: &'a str,
+    size: usize,
+}
+
 pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
     let cur_dir = std::env::current_dir()?;
 
@@ -72,9 +79,24 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
             println!("  target: {target}");
 
             let abi = match target.split('-').next().unwrap() {
-                arch if arch.starts_with("thumb") => ("lr", "0x8badf00d ^ 1", " ^1", 32),
-                arch if arch.starts_with("riscv") => ("ra", "0x8badf00d", "", 32),
-                arch if arch.starts_with("x86_64") => ("@[rsp, 8]", "0xffffffff8badf00d", "", 64),
+                arch if arch.starts_with("thumb") => Abi {
+                    lr: "lr",
+                    ret: "0x8badf00d ^ 1",
+                    thumb: " ^1",
+                    size: 32,
+                },
+                arch if arch.starts_with("riscv") => Abi {
+                    lr: "ra",
+                    ret: "0x8badf00d",
+                    thumb: "",
+                    size: 32,
+                },
+                arch if arch.starts_with("x86_64") => Abi {
+                    lr: "@[rsp, 8]",
+                    ret: "0xffffffff8badf00d",
+                    thumb: "",
+                    size: 64,
+                },
                 _ => panic!("unexpected target: {target}"),
             };
 
@@ -106,7 +128,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                     r#"load sections {sections} from file
 starting from <__checkct>
 with concrete stack pointer
-{} := {}
+{lr} := {ret}
 replace <__checkct_private_rand>{thumb} () by
 res<{size}> := secret
 return res
@@ -115,14 +137,13 @@ replace <__checkct_public_rand>{thumb} () by
 res<{size}> := nondet
 return res
 end
-halt at {}
+halt at {ret}
 explore all
 "#,
-                    abi.0,
-                    abi.1,
-                    abi.1,
-                    size = abi.3,
-                    thumb = abi.2,
+                    lr = abi.lr,
+                    ret = abi.ret,
+                    size = abi.size,
+                    thumb = abi.thumb,
                 )
                 .as_bytes(),
             )?;
