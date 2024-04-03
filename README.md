@@ -9,6 +9,7 @@ There are, however, a number of limitations to have in mind if you plan on using
 - As currently designed, cargo-checkct focuses exclusively on `#![no_std]` libraries or features.
 - For the moment, only bare-metal `thumb` and `riscv32` are supported, as well as `x86_64-unknown-linux-gnu` (with some caveats, for instance the use of `cpuid` for runtime detection of cpu features, as used in [RustCrypto](https://github.com/RustCrypto/utils/tree/master/cpufeatures), is not supported). This is mainly due to gaps in the architecture coverage of binsec and [unisim_archisec](https://github.com/binsec/unisim_archisec), that may resorb in the future.
 - The analysis is predicated on the fact that all instructions have data-independent timing (meaning for instance that even multiplication and division instructions' timing is not dependent on the operands).
+- Only Apple-silicon MacOS and am64 Linux hosts are supported (the only difference being the linker directive passed down to `rustc` for the `x86_64-unknown-linux-gnu` target).
 
 ## Install
 
