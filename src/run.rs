@@ -2,6 +2,7 @@ use std::{fs, io::Write, path::Path, time::Duration};
 
 use anyhow::{bail, Context, Result};
 use goblin::Object;
+use which::which;
 
 use crate::common::get_workspace_members;
 
@@ -23,7 +24,8 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
 
     // First we need to actually build the drivers
     std::env::set_current_dir(dir)?;
-    let output = std::process::Command::new("cargo")
+    let cargo_path = which("cargo").context("Failed to find cargo")?;
+    let output = std::process::Command::new(cargo_path)
         .arg("build")
         .arg("--release")
         .output()
@@ -147,7 +149,8 @@ explore all
                 .as_bytes(),
             )?;
 
-            let mut binsec_cmd = std::process::Command::new("binsec");
+            let binsec_path = which("binsec").context("Failed to find binsec - you might need to run `eval $(opam env)` first")?;
+            let mut binsec_cmd = std::process::Command::new(binsec_path);
             binsec_cmd
                 .arg("-sse")
                 .arg("-checkct")
