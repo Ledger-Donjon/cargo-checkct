@@ -34,11 +34,11 @@ Running
 cargo run --release -- init -d <path/to/your/rust/crypto/library>
 ```
 
-will initialize a `checkct/` directory at the designated path, and inside it a `driver` crate.
-You can then implement your verification harness (which checkct calls a driver) in `checkct/driver/src/main.rs`.
+will initialize a `checkct/` workspace at the designated path, and inside it a `driver` crate.
+You can then implement your verification harness (which checkct calls a driver) in `checkct/driver/src/driver.rs`.
 You can change the rustc targets for which verification will be done by modifying `checkct/.cargo/config.toml` and `checkct/rust-toolchain.toml`.
 
-At anypoint, you can add an additional verification driver (to verify another function exposed by your library, typically) with
+At anypoint, you can add an additional verification driver (to verify another function exposed by your library, for instance) with
 
 ```console
 cargo run --release -- add -d <path/to/your/rust/crypto/library> -n <name_of_the_new_driver_crate>
