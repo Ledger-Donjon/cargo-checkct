@@ -1,0 +1,11 @@
+[package]
+name = "{name}"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[dependencies]
+rand_core = "0.6.4"
+
+[dependencies.{lib_name}]
+path = "../.."
