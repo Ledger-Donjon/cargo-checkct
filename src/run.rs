@@ -149,7 +149,7 @@ explore all
                 .as_bytes(),
             )?;
 
-            let binsec_path = which("binsec").context("Failed to find binsec")?;
+            let binsec_path = which("binsec").context("Failed to find binsec - you might need to run `eval $(opam env)` first")?;
             let mut binsec_cmd = std::process::Command::new(binsec_path);
             binsec_cmd
                 .arg("-sse")
