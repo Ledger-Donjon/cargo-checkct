@@ -1,5 +1,5 @@
 [workspace]
-members = ["chacha20poly", "chacha8poly"]
+members = ["chacha20poly"]
 resolver = "2"
 
 [profile.release]

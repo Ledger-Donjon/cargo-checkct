@@ -73,14 +73,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "chacha8poly"
-version = "0.0.0"
-dependencies = [
- "chachapoly",
- "rand_core",
-]
-
-[[package]]
 name = "chachapoly"
 version = "0.0.0"
 dependencies = [
