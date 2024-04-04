@@ -1,6 +1,6 @@
 use std::{fs, io::Write, path::Path};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 
 use crate::common::{create_driver, get_lib_name, get_workspace_members};
 
@@ -13,10 +13,9 @@ pub fn add_driver(path: &Path, name: &str) -> Result<()> {
     println!("found library name: {}", lib_name);
 
     let mut members = get_workspace_members(&workspace_dir)?;
-    assert!(
-        !members.contains(&name),
-        "Error: the checkct workspace already contains driver {name}"
-    );
+    if !members.contains(&name) {
+        bail!("Error: the checkct workspace already contains driver {name}")
+    }
 
     // Then create the actual driver
     create_driver(&workspace_dir, &lib_name, &name)?;

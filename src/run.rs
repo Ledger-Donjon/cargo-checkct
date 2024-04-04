@@ -40,10 +40,9 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
 
     // Next we recover the actual name of the drivers
     let members = get_workspace_members(dir)?;
-    assert!(
-        !members.is_empty(),
-        "Error: found empty [workspace.members] key - no drivers to build."
-    );
+    if members.is_empty() {
+        bail!("Error: found empty [workspace.members] key - no drivers to build.");
+    }
 
     let mut overall_status = Status::Secure;
 
