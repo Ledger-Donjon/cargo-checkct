@@ -1,0 +1,14 @@
+load sections {sections} from file
+starting from <__checkct>
+with concrete stack pointer
+{lr} := {ret}
+replace <__checkct_private_rand>{thumb} () by
+res<{size}> := secret
+return res
+end
+replace <__checkct_public_rand>{thumb} () by
+res<{size}> := nondet
+return res
+end
+halt at {ret}
+explore all

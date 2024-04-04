@@ -124,21 +124,11 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
             )?;
             script.write_all(
                 format!(
-                    r#"load sections {sections} from file
-starting from <__checkct>
-with concrete stack pointer
-{lr} := {ret}
-replace <__checkct_private_rand>{thumb} () by
-res<{size}> := secret
-return res
-end
-replace <__checkct_public_rand>{thumb} () by
-res<{size}> := nondet
-return res
-end
-halt at {ret}
-explore all
-"#,
+                    include_str!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/template/target/driver.binsec"
+                    )),
+                    sections = sections,
                     lr = abi.lr,
                     ret = abi.ret,
                     size = abi.size,

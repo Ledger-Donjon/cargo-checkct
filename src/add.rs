@@ -25,14 +25,8 @@ pub fn add_driver(path: &Path, name: &str) -> Result<()> {
     let mut cargo_file = fs::File::create(workspace_dir.join("Cargo.toml"))?;
     cargo_file.write_all(
         format!(
-            r#"[workspace]
-members = [{}]
-resolver = "2"
-
-[profile.release]
-debug = true
-panic = "abort""#,
-            members
+            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/template/Cargo.toml")),
+            members = members
                 .into_iter()
                 .map(|s| format!("\"{s}\""))
                 .collect::<Vec<_>>()
