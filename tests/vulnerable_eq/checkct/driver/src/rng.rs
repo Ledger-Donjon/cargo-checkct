@@ -3,17 +3,13 @@
 #[no_mangle]
 #[inline(never)]
 pub fn __checkct_private_rand() -> u8 {
-    unsafe {
-        core::ptr::read_volatile(0xcafe as *const u8)
-    }
+    unsafe { core::ptr::read_volatile(0xcafe as *const u8) }
 }
 
 #[no_mangle]
 #[inline(never)]
 pub fn __checkct_public_rand() -> u8 {
-    unsafe {
-        core::ptr::read_volatile(0xf00d as *const u8)
-    }
+    unsafe { core::ptr::read_volatile(0xf00d as *const u8) }
 }
 
 pub use rand_core::{CryptoRng, RngCore};

@@ -1,4 +1,4 @@
-use crate::rng::{RngCore, CryptoRng, PublicRng, PrivateRng};
+use crate::rng::{CryptoRng, PrivateRng, PublicRng, RngCore};
 
 pub fn checkct() {
     use subtle_eq::ConstantTimeEq;

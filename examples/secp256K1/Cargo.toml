@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-secp256k1 = { version = "0.29.0", features = ["hashes", "rand"] }
+secp256k1 = { version = "0.29.0", default-features = false }
+secp256k1-sys = { version = "0.10.0", default-features = false }
