@@ -113,7 +113,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                     .section_headers
                     .iter()
                     .map(|h| elf.shdr_strtab.get_at(h.sh_name).unwrap())
-                    .filter(|n| [".text", ".got", ".data", ".rodata"].contains(n))
+                    .filter(|n| !n.is_empty())
                     .collect::<Vec<_>>()
                     .join(", "),
                 _ => bail!("Object format {obj:?} not supported"),

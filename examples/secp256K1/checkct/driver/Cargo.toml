@@ -7,5 +7,5 @@ edition = "2021"
 [dependencies]
 rand_core = "0.6.4"
 
-[dependencies.subtle_eq]
+[dependencies.secp256K1]
 path = "../.."

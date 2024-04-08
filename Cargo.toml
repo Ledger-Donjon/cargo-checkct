@@ -17,4 +17,4 @@ which = "6.0.1"
 assert_cmd = "2.0.14"
 
 [workspace]
-members = ["examples/chachapoly", "examples/dalek", "examples/masked_aes"]
+members = ["examples/chachapoly", "examples/dalek", "examples/masked_aes", "examples/secp256K1"]
