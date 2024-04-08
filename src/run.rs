@@ -113,7 +113,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                     .section_headers
                     .iter()
                     .map(|h| elf.shdr_strtab.get_at(h.sh_name).unwrap())
-                    .filter(|n| !n.is_empty())
+                    .filter(|n| !n.is_empty() && ![".note.gnu.build-id"].contains(n))
                     .collect::<Vec<_>>()
                     .join(", "),
                 _ => bail!("Object format {obj:?} not supported"),
@@ -139,7 +139,9 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                 .as_bytes(),
             )?;
 
-            let binsec_path = which("binsec").context("Failed to find binsec - you might need to run `eval $(opam env)` first")?;
+            let binsec_path = which("binsec").context(
+                "Failed to find binsec - you might need to run `eval $(opam env)` first",
+            )?;
             let mut binsec_cmd = std::process::Command::new(binsec_path);
             binsec_cmd
                 .arg("-sse")
