@@ -3,7 +3,7 @@ name: lint
 on:
   pull_request:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,9 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: rustfmt, clippy
+      - name: rustup
+        run: |
+          rustup update --no-self-update nightly
+          rustup component add --toolchain nightly rustfmt clippy
+          rustup default nightly
       - name: fmt
         run: cargo fmt --all -- --check
       - name: clippy
