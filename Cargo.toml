@@ -1,20 +1,3 @@
-[package]
-name = "cargo-checkct"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.80"
-cargo-manifest = "0.13.0"
-clap = { version = "4.5.2", features = ["derive"] }
-goblin = "0.8.0"
-toml = "0.8.11"
-which = "6.0.1"
-
-[dev-dependencies]
-assert_cmd = "2.0.14"
-
 [workspace]
-members = ["examples/chachapoly", "examples/dalek", "examples/masked_aes", "examples/secp256K1"]
+members = ["checkct", "cargo_checkct", "chacha20poly", "dalek"]
+resolver = "2"

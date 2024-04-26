@@ -1,0 +1,15 @@
+[package]
+name = "dalek"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+checkct = { path = "../checkct" }
+x25519-dalek = { version = "2.0.0", default-features = false }

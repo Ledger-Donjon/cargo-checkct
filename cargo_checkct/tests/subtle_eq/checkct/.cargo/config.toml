@@ -5,7 +5,7 @@ target = ["thumbv7em-none-eabihf", "riscv32imac-unknown-none-elf", "x86_64-unkno
 rustflags = ["-C", "link-arg=-nostartfiles"]
 
 [target.x86_64-unknown-linux-gnu]
-linker = "x86_64-unknown-linux-gnu-gcc"
+
 
 [unstable]
 unstable-options = true

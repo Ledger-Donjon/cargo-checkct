@@ -1,10 +1,10 @@
 /.DS_Store
-/tests/vulnerable_eq/checkct/target
-/tests/subtle_eq/checkct/target
-/examples/dalek/checkct/target
-/examples/chachapoly/checkct/target
-/examples/masked_aes/checkct/target
-/examples/secp256K1/checkct/target
+/cargo_checkct/tests/vulnerable_eq/checkct/target
+/cargo_checkct/tests/subtle_eq/checkct/target
+/cargo_checkct/examples/dalek/checkct/target
+/cargo_checkct/examples/chachapoly/checkct/target
+/cargo_checkct/examples/masked_aes/checkct/target
+/cargo_checkct/examples/secp256K1/checkct/target
 /unisim_archisec
 /binsec
 

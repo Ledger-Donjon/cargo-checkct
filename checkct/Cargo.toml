@@ -1,0 +1,10 @@
+[package]
+name = "checkct"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+test = false
+
+[dependencies]
+rand_core = "0.6.4"
