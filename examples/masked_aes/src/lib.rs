@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ledger
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 #![no_std]
 
 use core::ffi::c_int;

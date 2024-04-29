@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ledger
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::{fs, io::Write, path::Path};
 
 use anyhow::{bail, Result};

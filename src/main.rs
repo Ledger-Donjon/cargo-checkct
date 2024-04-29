@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Ledger
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::{path::PathBuf, time::Duration};
 
 use anyhow::Result;
