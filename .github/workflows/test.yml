@@ -1,9 +1,10 @@
 name: test
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -12,10 +13,12 @@ jobs:
   linux-amd64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: rust-src
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.3
+      - name: rustup
+        run: |
+          rustup update --no-self-update nightly
+          rustup component add --toolchain nightly rust-src
+          rustup default nightly
       - name: install binsec
         run: |
           sudo apt-get update
