@@ -31,7 +31,8 @@ pushd binsec && dune build @install && dune install && popd
 Running
 
 ```console
-cargo run --release -- init -d <path/to/your/rust/crypto/library>
+cargo b --release
+./target/release/cargo-checkct init -d <path/to/your/rust/crypto/library>
 ```
 
 will initialize a `checkct/` workspace at the designated path, and inside it a `driver` crate.
@@ -41,13 +42,13 @@ You can change the rustc targets for which verification will be done by modifyin
 At anypoint, you can add an additional verification driver (to verify another function exposed by your library, for instance) with
 
 ```console
-cargo run --release -- add -d <path/to/your/rust/crypto/library> -n <name_of_the_new_driver_crate>
+./target/release/cargo-checkct add -d <path/to/your/rust/crypto/library> -n <name_of_the_new_driver_crate>
 ```
 
 Then running
 
 ```console
-cargo run --release -- run -d <path/to/your/rust/crypto/library>
+./target/release/cargo-checkct run -d <path/to/your/rust/crypto/library>
 ```
 
 will build all drivers (for all the respective targets) in `release` mode and run binsec on the resulting binaries.
