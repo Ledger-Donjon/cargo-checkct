@@ -20,7 +20,7 @@ You will also need rust of course (<https://rustup.rs/>).
 opam init -y
 opam install -y dune dune-site menhir grain_dypgen ocamlgraph zarith toml bitwuzla
 eval $(opam env)
-git clone --branch 0.9.0 https://github.com/binsec/binsec
+git clone --branch 0.9.1 https://github.com/binsec/binsec
 git clone --branch 0.0.8 https://github.com/binsec/unisim_archisec
 pushd unisim_archisec && git apply ../unisim.patch && dune build @install && dune install && popd
 pushd binsec && dune build @install && dune install && popd
