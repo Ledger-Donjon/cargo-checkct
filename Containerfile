@@ -4,7 +4,7 @@ FROM docker.io/library/rust:slim-bullseye
 # Create a symlink for "x86_64-unknown-linux-gnu-gcc" to fix using x86_64-unknown-linux-gnu toolchain.
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests git libgmp-dev gcc g++ opam && \
+    apt-get install -y --no-install-recommends --no-install-suggests git libgmp-dev gcc g++ opam pkgconf && \
     apt-get clean && \
     rustup target add thumbv7em-none-eabihf && \
     rustup target add riscv32imac-unknown-none-elf && \
@@ -18,7 +18,7 @@ COPY unisim.patch /opt/
 
 RUN git clone --depth 1 --branch 0.0.8 https://github.com/binsec/unisim_archisec /opt/unisim_archisec && \
     (cd /opt/unisim_archisec && git apply /opt/unisim.patch && eval $(opam env) && dune build @install && dune install) && \
-    git clone --depth 1 --branch 0.9.0 https://github.com/binsec/binsec /opt/binsec && \
+    git clone --depth 1 --branch 0.9.1 https://github.com/binsec/binsec /opt/binsec && \
     (cd /opt/binsec && eval $(opam env) && dune build @install && dune install)
 
 # Copy cargo-checkct to /src
