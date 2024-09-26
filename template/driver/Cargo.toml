@@ -6,6 +6,5 @@ edition = "2021"
 
 [dependencies]
 rand_core = "0.6.4"
-
-[dependencies.{lib_name}]
-path = "../.."
+checkct_macros = {{ path = "{checkct_macros_crate_path}" }}
+{lib_name} = {{ path = "../.." }}

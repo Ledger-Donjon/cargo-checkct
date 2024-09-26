@@ -17,7 +17,7 @@ pub fn add_driver(path: &Path, name: &str) -> Result<()> {
     println!("found library name: {}", lib_name);
 
     let mut members = get_workspace_members(&workspace_dir)?;
-    if !members.contains(&name) {
+    if members.contains(&name) {
         bail!("Error: the checkct workspace already contains driver {name}")
     }
 

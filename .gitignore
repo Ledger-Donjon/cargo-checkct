@@ -4,6 +4,7 @@
 /examples/dalek/checkct/target
 /examples/chachapoly/checkct/target
 /examples/masked_aes/checkct/target
+/examples/memcmp/checkct/target
 /examples/secp256K1/checkct/target
 /unisim_archisec
 /binsec

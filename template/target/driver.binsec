@@ -1,5 +1,5 @@
 load sections {sections} from file
-starting from <__checkct>
+starting from <{entrypoint}>
 with concrete stack pointer
 {lr} := {ret}
 replace <__checkct_private_rand>{thumb} () by
