@@ -10,6 +10,7 @@ anyhow = "1.0.80"
 cargo-manifest = "0.13.0"
 clap = { version = "4.5.2", features = ["derive"] }
 goblin = "0.8.0"
+pathdiff = "0.2.1"
 toml = "0.8.11"
 which = "6.0.1"
 
@@ -17,4 +18,4 @@ which = "6.0.1"
 assert_cmd = "2.0.14"
 
 [workspace]
-members = ["examples/chachapoly", "examples/dalek", "examples/masked_aes", "examples/secp256K1"]
+members = [ "checkct_macros", "examples/chachapoly", "examples/dalek", "examples/masked_aes", "examples/secp256K1" ]

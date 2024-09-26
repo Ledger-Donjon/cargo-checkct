@@ -4,7 +4,7 @@
 
 use std::{fs, io::Write, path::Path};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use cargo_manifest::Manifest;
 
 /// Retrieve the name of the rust library at `path` from its cargo manifest.
@@ -39,10 +39,21 @@ pub fn get_workspace_members(workspace_dir: &Path) -> Result<Vec<String>> {
 /// Create a driver crate named `name` in the checkct workspace at `workspace_dir`, to test the `lib_name` crate.
 pub fn create_driver(workspace_dir: &Path, lib_name: &str, name: &str) -> Result<()> {
     // Create the crate's directory structure
-    fs::create_dir_all(workspace_dir.join(name).join("src"))?;
+    let driver_path = workspace_dir.join(name);
+    fs::create_dir_all(driver_path.join("src"))?;
+
+    // Relative path to checkct_macros
+    let checkct_macros_crate_path = pathdiff::diff_paths(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("checkct_macros"),
+        driver_path.canonicalize()?,
+    )
+    .context("Failed to compute the relative path between checkct_macros and the driver directory")?
+    .into_os_string()
+    .into_string()
+    .map_err(|_| anyhow!("Failed to convert relative checkct_macros path to string"))?;
 
     // Create the driver Cargo.toml file
-    let mut driver_cargo_file = fs::File::create(workspace_dir.join(name).join("Cargo.toml"))?;
+    let mut driver_cargo_file = fs::File::create(driver_path.join("Cargo.toml"))?;
     driver_cargo_file.write_all(
         format!(
             include_str!(concat!(
@@ -50,6 +61,7 @@ pub fn create_driver(workspace_dir: &Path, lib_name: &str, name: &str) -> Result
                 "/template/driver/Cargo.toml"
             )),
             name = name,
+            checkct_macros_crate_path = checkct_macros_crate_path,
             lib_name = lib_name
         )
         .as_bytes(),
