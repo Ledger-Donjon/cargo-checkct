@@ -13,7 +13,19 @@ fn memcmp(a: &[u8], b: &[u8]) -> bool {
 }
 
 #[checkct]
-fn test_memcmp() {
+fn checkct_memcmp() {
+    let mut a = [0u8; 128];
+    let mut b = [0u8; 128];
+
+    PrivateRng.fill_bytes(&mut a);
+    PublicRng.fill_bytes(&mut b);
+
+    let result = memcmp(&a, &b);
+    core::hint::black_box(result);
+}
+
+#[checkct(descriptor_link_section = ".rodata")]
+fn checkct_memcmp2() {
     let mut a = [0u8; 128];
     let mut b = [0u8; 128];
 
