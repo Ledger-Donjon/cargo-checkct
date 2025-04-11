@@ -9,7 +9,7 @@ There are, however, a number of limitations to have in mind if you plan on using
 - As currently designed, cargo-checkct focuses exclusively on `#![no_std]` libraries or features.
 - For the moment, only bare-metal `thumb` and `riscv32` are supported, as well as `x86_64-unknown-linux-gnu` (with some caveats, for instance the use of `cpuid` for runtime detection of cpu features, as used in [RustCrypto](https://github.com/RustCrypto/utils/tree/master/cpufeatures), is not supported). This is mainly due to gaps in the architecture coverage of binsec and [unisim_archisec](https://github.com/binsec/unisim_archisec), that may resorb in the future.
 - The analysis is predicated on the fact that all instructions have data-independent timing (meaning for instance that even multiplication and division instructions' timing is not dependent on the operands).
-- Only Apple-silicon MacOS and am64 Linux hosts are supported (the only difference being the linker directive passed down to `rustc` for the `x86_64-unknown-linux-gnu` target).
+- Only Apple-silicon MacOS and amd64 Linux hosts are supported (the only difference being the linker directive passed down to `rustc` for the `x86_64-unknown-linux-gnu` target).
 
 ## Install
 
@@ -20,9 +20,9 @@ You will also need rust of course (<https://rustup.rs/>).
 opam init -y
 opam install -y dune dune-site menhir grain_dypgen ocamlgraph zarith toml bitwuzla
 eval $(opam env)
-git clone --branch 0.9.1 https://github.com/binsec/binsec
-git clone --branch 0.0.8 https://github.com/binsec/unisim_archisec
-pushd unisim_archisec && git apply ../unisim.patch && dune build @install && dune install && popd
+git clone --branch 0.10.0 https://github.com/binsec/binsec
+git clone --branch 0.0.10 https://github.com/binsec/unisim_archisec
+pushd unisim_archisec && dune build @install && dune install && popd
 pushd binsec && dune build @install && dune install && popd
 ```
 
