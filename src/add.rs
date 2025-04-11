@@ -4,7 +4,7 @@
 
 use std::{fs, io::Write, path::Path};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 
 use crate::common::{create_driver, get_lib_name, get_workspace_members};
 
