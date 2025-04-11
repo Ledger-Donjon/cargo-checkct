@@ -4,8 +4,8 @@
 
 use std::{fs, io::Write, path::Path, time::Duration};
 
-use anyhow::{bail, Context, Result};
-use goblin::{container::Endian, elf::Elf, Object};
+use anyhow::{Context, Result, bail};
+use goblin::{Object, container::Endian, elf::Elf};
 use which::which;
 
 use crate::common::get_workspace_members;
@@ -118,7 +118,9 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
             bail!("[build] entry of the config manifest in: {config_path:?} is not a toml::Table");
         };
         let toml::Value::Array(target_list) = build_table.get("target").with_context(|| {
-            format!("Failed to find the [build.target] entry of the config manifest in: {config_path:?}")
+            format!(
+                "Failed to find the [build.target] entry of the config manifest in: {config_path:?}"
+            )
         })?
         else {
             bail!("")

@@ -4,7 +4,7 @@
 
 use std::{fs, io::Write, path::Path};
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use cargo_manifest::Manifest;
 
 /// Retrieve the name of the rust library at `path` from its cargo manifest.

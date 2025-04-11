@@ -6,6 +6,5 @@ edition = "2021"
 
 [dependencies]
 rand_core = "0.6.4"
-
-[dependencies.subtle_eq]
-path = "../.."
+checkct_macros = { path = "../../../../checkct_macros" }
+subtle_eq = { path = "../.." }

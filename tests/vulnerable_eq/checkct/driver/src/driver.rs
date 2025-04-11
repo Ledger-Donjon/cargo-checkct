@@ -1,5 +1,7 @@
 use crate::rng::{CryptoRng, PrivateRng, PublicRng, RngCore};
+use checkct_macros::checkct;
 
+#[checkct]
 pub fn checkct() {
     use vulnerable_eq::eq;
     let mut left = [0u8; 32];

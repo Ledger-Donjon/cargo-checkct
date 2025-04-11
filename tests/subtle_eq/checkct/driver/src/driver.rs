@@ -1,5 +1,7 @@
 use crate::rng::{CryptoRng, PrivateRng, PublicRng, RngCore};
+use checkct_macros::checkct;
 
+#[checkct]
 pub fn checkct() {
     use subtle_eq::ConstantTimeEq;
     let mut left = [0u8; 8];
