@@ -31,7 +31,7 @@ fn vulnerable() {
         .arg("--dir=tests/vulnerable_eq")
         .arg("--timeout=60")
         .assert()
-        .success();
+        .failure();
 
     let output = String::from_utf8_lossy(&output.get_output().stdout);
     println!("{output}");
