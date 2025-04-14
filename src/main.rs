@@ -4,7 +4,7 @@
 
 use std::{path::PathBuf, time::Duration};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::{Parser, Subcommand};
 
 mod add;
@@ -66,7 +66,7 @@ fn main() -> Result<()> {
         Command::Init { dir, name } => {
             let dir = dir.unwrap_or(std::env::current_dir()?);
             let name = &name.unwrap_or("driver".to_owned());
-            init_workspace(&dir, name)?;
+            init_workspace(&dir, name)
         }
         Command::Run { dir, timeout } => {
             let dir = dir.unwrap_or(std::env::current_dir()?).join("checkct");
@@ -74,20 +74,21 @@ fn main() -> Result<()> {
             match run_binsec(&dir, Duration::from_secs(timeout))? {
                 run::Status::Secure => {
                     println!("SECURE");
+                    Ok(())
                 }
                 run::Status::Insecure => {
                     println!("INSECURE");
+                    bail!("Insecure code!")
                 }
                 run::Status::Unknown => {
                     println!("UNKNOWN");
+                    Ok(())
                 }
             }
         }
         Command::Add { dir, name } => {
             let dir = dir.unwrap_or(std::env::current_dir()?);
-            add_driver(&dir, &name)?;
+            add_driver(&dir, &name)
         }
-    };
-
-    Ok(())
+    }
 }
