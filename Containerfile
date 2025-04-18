@@ -14,11 +14,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     ln -s /usr/bin/x86_64-linux-gnu-gcc /usr/local/bin/x86_64-unknown-linux-gnu-gcc
 
 # Install binsec
-COPY unisim.patch /opt/
-
-RUN git clone --depth 1 --branch 0.0.8 https://github.com/binsec/unisim_archisec /opt/unisim_archisec && \
-    (cd /opt/unisim_archisec && git apply /opt/unisim.patch && eval $(opam env) && dune build @install --release && dune install) && \
-    git clone --depth 1 --branch 0.9.1 https://github.com/binsec/binsec /opt/binsec && \
+RUN git clone --depth 1 --branch 0.0.10 https://github.com/binsec/unisim_archisec /opt/unisim_archisec && \
+    (cd /opt/unisim_archisec && eval $(opam env) && dune build @install --release && dune install) && \
+    git clone --depth 1 --branch 0.10.0 https://github.com/binsec/binsec /opt/binsec && \
     (cd /opt/binsec && eval $(opam env) && dune build @install --release && dune install)
 
 # Copy cargo-checkct to /src

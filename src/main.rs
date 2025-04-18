@@ -4,7 +4,7 @@
 
 use std::{path::PathBuf, time::Duration};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::{Parser, Subcommand};
 
 mod add;
@@ -46,6 +46,10 @@ enum Command {
         /// Set a timeout in seconds. If not set, defaults to 10 minutes (600 seconds).
         #[arg(short, long, value_name = "SECONDS")]
         timeout: Option<u64>,
+
+        /// Do not raise an error if binsec cannot conclude on the tested implementation.
+        #[arg(long, action)]
+        skip_unknown: bool,
     },
     Add {
         /// Set the path to the checkct workspace,
@@ -66,28 +70,37 @@ fn main() -> Result<()> {
         Command::Init { dir, name } => {
             let dir = dir.unwrap_or(std::env::current_dir()?);
             let name = &name.unwrap_or("driver".to_owned());
-            init_workspace(&dir, name)?;
+            init_workspace(&dir, name)
         }
-        Command::Run { dir, timeout } => {
+        Command::Run {
+            dir,
+            timeout,
+            skip_unknown,
+        } => {
             let dir = dir.unwrap_or(std::env::current_dir()?).join("checkct");
             let timeout = timeout.unwrap_or(600);
             match run_binsec(&dir, Duration::from_secs(timeout))? {
                 run::Status::Secure => {
                     println!("SECURE");
+                    Ok(())
                 }
                 run::Status::Insecure => {
                     println!("INSECURE");
+                    bail!("Insecure code!")
                 }
                 run::Status::Unknown => {
                     println!("UNKNOWN");
+                    if skip_unknown {
+                        Ok(())
+                    } else {
+                        bail!("Unknown status!")
+                    }
                 }
             }
         }
         Command::Add { dir, name } => {
             let dir = dir.unwrap_or(std::env::current_dir()?);
-            add_driver(&dir, &name)?;
+            add_driver(&dir, &name)
         }
-    };
-
-    Ok(())
+    }
 }
