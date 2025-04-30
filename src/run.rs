@@ -81,10 +81,14 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
     let mut cmd = std::process::Command::new(cargo_path);
     cmd.arg("build").arg("--release");
 
-    // For ARM based MacOS, we need to change the linker for the x86 cross-compilation
+    // We need to change the linker for the x86 cross-compilation
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
     cmd.arg("--config")
         .arg("target.x86_64-unknown-linux-gnu.linker=\"x86_64-unknown-linux-gnu-gcc\"");
+
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+    cmd.arg("--config")
+        .arg("target.x86_64-unknown-linux-gnu.linker=\"x86_64-linux-gnu-gcc\"");
 
     let output = cmd.output().context("Failed to build drivers")?;
 
