@@ -31,17 +31,10 @@ pub fn init_workspace(path: &Path, name: &str) -> Result<()> {
     // Create the config.toml file
     let mut config_file = fs::File::create(workspace_dir.join(".cargo").join("config.toml"))?;
     config_file.write_all(
-        format!(
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/template/.cargo/config.toml"
-            )),
-            linker = if cfg!(on_apple_silicon) {
-                "linker = \"x86_64-unknown-linux-gnu-gcc\""
-            } else {
-                ""
-            }
-        )
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/template/.cargo/config.toml"
+        ))
         .as_bytes(),
     )?;
 
