@@ -78,11 +78,15 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
     std::env::set_current_dir(dir)
         .with_context(|| format!("Failed to set current directory to {dir:?}"))?;
     let cargo_path = which("cargo").context("Failed to find cargo")?;
-    let output = std::process::Command::new(cargo_path)
-        .arg("build")
-        .arg("--release")
-        .output()
-        .context("Failed to build drivers")?;
+    let mut cmd = std::process::Command::new(cargo_path);
+    cmd.arg("build").arg("--release");
+
+    // For ARM based MacOS, we need to change the linker for the x86 cross-compilation
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    cmd.arg("--config")
+        .arg("target.x86_64-unknown-linux-gnu.linker=\"x86_64-unknown-linux-gnu-gcc\"");
+
+    let output = cmd.output().context("Failed to build drivers")?;
 
     if !output.status.success() {
         bail!(
@@ -231,10 +235,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                             .to_string_lossy()
                     ));
 
-                println!(
-                    "{}",
-                    format!("  Running: {:?}", binsec_cmd).replace('\"', "")
-                );
+                println!("{}", format!("  Running: {binsec_cmd:?}").replace('\"', ""));
                 let output = binsec_cmd.output().context("Failed to run binsec")?;
 
                 let driver_status;

@@ -4,9 +4,6 @@ target = ["thumbv7em-none-eabihf", "riscv32imac-unknown-none-elf", "x86_64-unkno
 [target.'cfg(target_os = "linux")']
 rustflags = ["-C", "link-arg=-nostartfiles", "-C", "relocation-model=static"]
 
-[target.x86_64-unknown-linux-gnu]
-{linker}
-
 [unstable]
 unstable-options = true
 build-std = ["core", "panic_abort"]

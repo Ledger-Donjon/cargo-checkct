@@ -14,7 +14,7 @@ pub fn add_driver(path: &Path, name: &str) -> Result<()> {
 
     // First recover the library name and the members of the checkct workspace
     let lib_name = get_lib_name(path)?;
-    println!("found library name: {}", lib_name);
+    println!("found library name: {lib_name}");
 
     let mut members = get_workspace_members(&workspace_dir)?;
     if members.contains(&name) {
