@@ -235,10 +235,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
                             .to_string_lossy()
                     ));
 
-                println!(
-                    "{}",
-                    format!("  Running: {:?}", binsec_cmd).replace('\"', "")
-                );
+                println!("{}", format!("  Running: {binsec_cmd:?}").replace('\"', ""));
                 let output = binsec_cmd.output().context("Failed to run binsec")?;
 
                 let driver_status;

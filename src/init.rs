@@ -12,7 +12,7 @@ pub fn init_workspace(path: &Path, name: &str) -> Result<()> {
     // First of all, we need to check that the designated path is a proper cargo lib workspace,
     // and recover the name of the crate
     let lib_name = get_lib_name(path)?;
-    println!("found library name: {}", lib_name);
+    println!("found library name: {lib_name}");
 
     // The workspace directory name is hardcoded to /checkct
     let workspace_dir = path.join("checkct");
