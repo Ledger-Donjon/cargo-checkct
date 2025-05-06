@@ -81,8 +81,7 @@ pub fn run_binsec(dir: &Path, timeout: Duration) -> Result<Status> {
     let mut cmd = std::process::Command::new(cargo_path);
     // Enforce -fno-stack-protector since we build with no_std
     cmd.env("CFLAGS", "-fno-stack-protector");
-    cmd.arg("build")
-        .arg("--release");
+    cmd.arg("build").arg("--release");
 
     // We need to change the linker for the x86 cross-compilation
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
