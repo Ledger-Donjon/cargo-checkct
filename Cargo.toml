@@ -2,20 +2,26 @@
 name = "cargo-checkct"
 version = "0.1.0"
 edition = "2024"
+description = "Formally verify that Rust cryptographic code compiles down to constant-time machine code, using binsec"
+repository = "https://github.com/Ledger-Donjon/cargo-checkct"
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.80"
-cargo-manifest = "0.19.1"
+cargo-manifest = "0.21.0"
 clap = { version = "4.5.2", features = ["derive"] }
-goblin = "0.8.0"
-pathdiff = "0.2.1"
-toml = "0.8.11"
-which = "6.0.1"
+goblin = "0.10.0"
+rustc-demangle = "0.1.24"
+serde_json = "1.0.120"
+toml = "1.0.0"
+toml_edit = "0.25.0"
+which = "8.0.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.14"
+tempfile = "3.10.0"
 
 [workspace]
 members = [ "checkct_macros", "examples/chachapoly", "examples/dalek", "examples/masked_aes", "examples/secp256K1" ]

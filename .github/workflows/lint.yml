@@ -6,6 +6,9 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -Dwarnings
@@ -14,13 +17,12 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: rustup
-        run: |
-          rustup update --no-self-update nightly
-          rustup component add --toolchain nightly rustfmt clippy
-          rustup default nightly
+        run: rustup component add rustfmt clippy
       - name: fmt
         run: cargo fmt --all -- --check
       - name: clippy
-        run: cargo clippy --verbose
+        run: |
+          cargo clippy --verbose --all-targets -p cargo-checkct
+          cargo clippy --verbose -p checkct_macros

@@ -2,9 +2,13 @@
 name = "{name}"
 version = "0.0.0"
 publish = false
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-rand_core = "0.6.4"
-checkct_macros = {{ path = "{checkct_macros_crate_path}" }}
+checkct_macros = {{ path = "../checkct_macros" }}
 {lib_name} = {{ path = "../.." }}
+# PrivateRng and PublicRng implement the traits of all these rand_core versions,
+# so that they can be passed to libraries depending on any of them.
+rand_core = "0.10"
+rand_core_09 = {{ package = "rand_core", version = "0.9" }}
+rand_core_06 = {{ package = "rand_core", version = "0.6" }}

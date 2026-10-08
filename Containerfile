@@ -1,22 +1,36 @@
-FROM docker.io/library/rust:slim-bullseye
+# SPDX-FileCopyrightText: 2024 Ledger
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
 
-# Install dependencies and Rust toolchains
+FROM docker.io/library/rust:1-slim-trixie
+
+ARG OCAML_VERSION=5.4.1
+ARG BINSEC_VERSION=0.11.3
+ARG UNISIM_ARCHISEC_VERSION=0.0.14
+
+ENV OPAMROOT=/opt/opam \
+    OPAMYES=1 \
+    OPAMCOLOR=never
+
+# Install system dependencies, then binsec, unisim_archisec and bitwuzla from opam
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests git libgmp-dev gcc g++ opam pkgconf && \
-    apt-get clean && \
-    rustup target add thumbv7em-none-eabihf && \
-    rustup target add riscv32imac-unknown-none-elf && \
-    opam init --disable-sandboxing -y && \
-    opam install -y dune dune-site menhir grain_dypgen ocamlgraph zarith toml bitwuzla && \
-    echo 'eval $(opam env)' >> /root/.bashrc
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        bzip2 ca-certificates curl g++ gcc git libgmp-dev libmpfr-dev make opam patch pkgconf unzip && \
+    rm -rf /var/lib/apt/lists/* && \
+    opam init --bare --disable-sandboxing -n && \
+    opam switch create checkct "ocaml-base-compiler.${OCAML_VERSION}" && \
+    opam install --switch=checkct \
+        "binsec.${BINSEC_VERSION}" "unisim_archisec.${UNISIM_ARCHISEC_VERSION}" bitwuzla-cxx && \
+    opam clean -a -c -s --logs
 
-# Install binsec
-RUN git clone --depth 1 --branch 0.0.10 https://github.com/binsec/unisim_archisec /opt/unisim_archisec && \
-    (cd /opt/unisim_archisec && eval $(opam env) && dune build @install --release && dune install) && \
-    git clone --depth 1 --branch 0.10.0 https://github.com/binsec/binsec /opt/binsec && \
-    (cd /opt/binsec && eval $(opam env) && dune build @install --release && dune install)
+ENV PATH=/opt/opam/checkct/bin:$PATH
 
-# Copy cargo-checkct to /src
+# Install the nightly toolchain pinned by the checkct workspace template
+COPY template/rust-toolchain.toml /tmp/toolchain/rust-toolchain.toml
+RUN cd /tmp/toolchain && rustup toolchain install && rm -rf /tmp/toolchain
+
+# Install cargo-checkct
 COPY . /src/
+RUN cargo install --locked --path /src --root /usr/local && rm -rf /src/target
 WORKDIR /src

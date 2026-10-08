@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{fs, io::Write, path::Path};
+use std::{fs, path::Path};
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result};
 use cargo_manifest::Manifest;
 
 /// Retrieve the name of the rust library at `path` from its cargo manifest.
@@ -36,66 +36,82 @@ pub fn get_workspace_members(workspace_dir: &Path) -> Result<Vec<String>> {
     Ok(members)
 }
 
+/// Write `contents` to `path`, creating the parent directories if needed.
+pub fn write_file(path: &Path, contents: &str) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create directory {parent:?}"))?;
+    }
+    fs::write(path, contents).with_context(|| format!("Failed to write {path:?}"))
+}
+
+/// Vendor the `checkct_macros` crate into the checkct workspace at `workspace_dir`,
+/// so that the workspace does not depend on the location of the cargo-checkct sources.
+pub fn create_macros_crate(workspace_dir: &Path) -> Result<()> {
+    let macros_dir = workspace_dir.join("checkct_macros");
+    write_file(
+        &macros_dir.join("Cargo.toml"),
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/template/checkct_macros/Cargo.toml"
+        )),
+    )?;
+    write_file(
+        &macros_dir.join("src").join("lib.rs"),
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/checkct_macros/src/lib.rs"
+        )),
+    )
+}
+
 /// Create a driver crate named `name` in the checkct workspace at `workspace_dir`, to test the `lib_name` crate.
 pub fn create_driver(workspace_dir: &Path, lib_name: &str, name: &str) -> Result<()> {
-    // Create the crate's directory structure
     let driver_path = workspace_dir.join(name);
-    fs::create_dir_all(driver_path.join("src"))?;
 
-    // Relative path to checkct_macros
-    let checkct_macros_crate_path = pathdiff::diff_paths(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("checkct_macros"),
-        driver_path.canonicalize()?,
-    )
-    .context("Failed to compute the relative path between checkct_macros and the driver directory")?
-    .into_os_string()
-    .into_string()
-    .map_err(|_| anyhow!("Failed to convert relative checkct_macros path to string"))?;
+    // Workspaces created by older versions of cargo-checkct referenced the
+    // checkct_macros crate in the cargo-checkct sources, so vendor it if needed.
+    if !workspace_dir.join("checkct_macros").exists() {
+        create_macros_crate(workspace_dir)?;
+    }
 
-    // Create the driver Cargo.toml file
-    let mut driver_cargo_file = fs::File::create(driver_path.join("Cargo.toml"))?;
-    driver_cargo_file.write_all(
-        format!(
+    write_file(
+        &driver_path.join("Cargo.toml"),
+        &format!(
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/template/driver/Cargo.toml"
             )),
             name = name,
-            checkct_macros_crate_path = checkct_macros_crate_path,
             lib_name = lib_name
-        )
-        .as_bytes(),
+        ),
     )?;
 
-    // Create the driver's rng.rs file
-    let mut rng_file = fs::File::create(workspace_dir.join(name).join("src").join("rng.rs"))?;
-    rng_file.write_all(
-        include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/template/driver/src/rng.rs"
-        ))
-        .as_bytes(),
-    )?;
-
-    // Create the driver's main.rs file
-    let mut main_file = fs::File::create(workspace_dir.join(name).join("src").join("main.rs"))?;
-    main_file.write_all(
-        include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/template/driver/src/main.rs"
-        ))
-        .as_bytes(),
-    )?;
-
-    // Create the driver's driver.rs file
-    let mut driver_file = fs::File::create(workspace_dir.join(name).join("src").join("driver.rs"))?;
-    driver_file.write_all(
-        include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/template/driver/src/driver.rs"
-        ))
-        .as_bytes(),
-    )?;
+    for (file, contents) in [
+        (
+            "rng.rs",
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/template/driver/src/rng.rs"
+            )),
+        ),
+        (
+            "main.rs",
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/template/driver/src/main.rs"
+            )),
+        ),
+        (
+            "driver.rs",
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/template/driver/src/driver.rs"
+            )),
+        ),
+    ] {
+        write_file(&driver_path.join("src").join(file), contents)?;
+    }
 
     Ok(())
 }
