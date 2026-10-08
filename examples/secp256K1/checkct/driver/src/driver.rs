@@ -1,4 +1,4 @@
-use crate::rng::{CryptoRng, PrivateRng, PublicRng, RngCore};
+use crate::rng::{PrivateRng, PublicRng};
 use checkct_macros::checkct;
 
 #[checkct]

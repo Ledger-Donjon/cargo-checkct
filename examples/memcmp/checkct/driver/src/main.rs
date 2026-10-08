@@ -5,7 +5,7 @@ use checkct_macros::checkct;
 
 mod rng;
 
-use crate::rng::{CryptoRng, PrivateRng, PublicRng, RngCore};
+use crate::rng::{PrivateRng, PublicRng};
 
 pub fn memcmp(a: &[u8], b: &[u8]) -> bool {
     assert_eq!(a, b);
@@ -54,12 +54,19 @@ fn checkct_memcmp_maybe_ct() {
     core::hint::black_box(result);
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     panic!()
 }
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
+    __checkct_panic()
+}
+
+/// The analysis of a path stops when it reaches this function.
+#[unsafe(no_mangle)]
+#[inline(never)]
+pub extern "C" fn __checkct_panic() -> ! {
     loop {}
 }

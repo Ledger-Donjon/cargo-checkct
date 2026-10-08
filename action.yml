@@ -1,0 +1,130 @@
+# SPDX-FileCopyrightText: 2024 Ledger
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: cargo-checkct
+description: Formally verify that Rust code compiles down to constant-time machine code, with binsec
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  directory:
+    description: Path to the library containing the checkct workspace
+    default: .
+  timeout:
+    description: binsec timeout in seconds, for each entrypoint
+    default: '600'
+  checks:
+    description: Comma-separated constant-time checks to perform (control-flow, memory-access, multiplication, dividend, divisor)
+    default: control-flow,memory-access
+  skip-unknown:
+    description: Do not fail if binsec cannot conclude on the tested implementation
+    default: 'false'
+  all-leaks:
+    description: Keep exploring after the first leak of each entrypoint, to report all the leaky instructions
+    default: 'false'
+  jobs:
+    description: Number of binsec analyses to run in parallel (defaults to the number of CPUs)
+    default: ''
+  setup-only:
+    description: Only install binsec and cargo-checkct, without running cargo-checkct
+    default: 'false'
+  binsec-version:
+    description: binsec version
+    default: 0.11.3
+  unisim-archisec-version:
+    description: unisim_archisec version
+    default: 0.0.14
+  ocaml-version:
+    description: OCaml version used to build binsec
+    default: 5.4.1
+
+runs:
+  using: composite
+  steps:
+    - name: Check runner
+      if: runner.os != 'Linux'
+      shell: bash
+      run: |
+        echo "::error::The cargo-checkct action only supports Linux runners"
+        exit 1
+
+    - name: Set up environment
+      shell: bash
+      run: |
+        echo "OPAMROOT=$HOME/.cargo-checkct-opam" >> "$GITHUB_ENV"
+        # binsec links to system libraries, so the cache depends on the runner image
+        echo "CARGO_CHECKCT_IMAGE_OS=$ImageOS" >> "$GITHUB_ENV"
+
+    # Building binsec and its dependencies takes a while, so cache the whole opam root
+    - name: Restore binsec cache
+      id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cargo-checkct-opam
+        key: cargo-checkct-binsec-${{ runner.os }}-${{ runner.arch }}-${{ env.CARGO_CHECKCT_IMAGE_OS }}-ocaml-${{ inputs.ocaml-version }}-binsec-${{ inputs.binsec-version }}-unisim-${{ inputs.unisim-archisec-version }}
+
+    - name: Install binsec
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        OPAMYES: '1'
+        # Let opam install the system packages it requires, if any are missing
+        OPAMCONFIRMLEVEL: unsafe-yes
+        OCAML_VERSION: ${{ inputs.ocaml-version }}
+        BINSEC_VERSION: ${{ inputs.binsec-version }}
+        UNISIM_ARCHISEC_VERSION: ${{ inputs.unisim-archisec-version }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libgmp-dev libmpfr-dev opam
+        opam init --bare --disable-sandboxing -n
+        opam switch create checkct "ocaml-base-compiler.$OCAML_VERSION"
+        opam install --switch=checkct \
+          "binsec.$BINSEC_VERSION" "unisim_archisec.$UNISIM_ARCHISEC_VERSION" bitwuzla-cxx
+        opam clean -a -c -s --logs
+
+    # Save the cache right away, even if the verification fails later on
+    - name: Save binsec cache
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cargo-checkct-opam
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+
+    - name: Install cargo-checkct
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        echo "$OPAMROOT/checkct/bin" >> "$GITHUB_PATH"
+        cargo install --locked --path . --root "$RUNNER_TEMP/cargo-checkct"
+        echo "$RUNNER_TEMP/cargo-checkct/bin" >> "$GITHUB_PATH"
+
+    - name: Install the Rust toolchain of the checkct workspace
+      if: inputs.setup-only != 'true'
+      shell: bash
+      working-directory: ${{ inputs.directory }}/checkct
+      run: rustup toolchain install
+
+    - name: Run cargo-checkct
+      if: inputs.setup-only != 'true'
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.directory }}
+        TIMEOUT: ${{ inputs.timeout }}
+        CHECKS: ${{ inputs.checks }}
+        SKIP_UNKNOWN: ${{ inputs.skip-unknown }}
+        ALL_LEAKS: ${{ inputs.all-leaks }}
+        JOBS: ${{ inputs.jobs }}
+      run: |
+        args=(run --dir "$DIRECTORY" --timeout "$TIMEOUT" --checks "$CHECKS")
+        if [[ "$SKIP_UNKNOWN" == "true" ]]; then
+          args+=(--skip-unknown)
+        fi
+        if [[ "$ALL_LEAKS" == "true" ]]; then
+          args+=(--all-leaks)
+        fi
+        if [[ -n "$JOBS" ]]; then
+          args+=(--jobs "$JOBS")
+        fi
+        cargo-checkct "${args[@]}"

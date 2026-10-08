@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{fs, io::Write, path::Path};
+use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 
-use crate::common::{create_driver, get_lib_name};
+use crate::common::{create_driver, create_macros_crate, get_lib_name, write_file};
 
 pub fn init_workspace(path: &Path, name: &str) -> Result<()> {
     // First of all, we need to check that the designated path is a proper cargo lib workspace,
@@ -16,38 +16,37 @@ pub fn init_workspace(path: &Path, name: &str) -> Result<()> {
 
     // The workspace directory name is hardcoded to /checkct
     let workspace_dir = path.join("checkct");
-    fs::create_dir_all(workspace_dir.join(".cargo"))?;
+    if workspace_dir.join("Cargo.toml").exists() {
+        bail!(
+            "A checkct workspace already exists in {workspace_dir:?}; use `cargo-checkct add` to add a new driver to it"
+        );
+    }
 
-    // Create the rust-toolchain.toml file
-    let mut toolchain_file = fs::File::create(workspace_dir.join("rust-toolchain.toml"))?;
-    toolchain_file.write_all(
+    write_file(
+        &workspace_dir.join("rust-toolchain.toml"),
         include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/template/rust-toolchain.toml"
-        ))
-        .as_bytes(),
+        )),
     )?;
 
-    // Create the config.toml file
-    let mut config_file = fs::File::create(workspace_dir.join(".cargo").join("config.toml"))?;
-    config_file.write_all(
+    write_file(
+        &workspace_dir.join(".cargo").join("config.toml"),
         include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/template/.cargo/config.toml"
-        ))
-        .as_bytes(),
+        )),
     )?;
 
-    // Create the workspace Cargo.toml file
-    let mut cargo_file = fs::File::create(workspace_dir.join("Cargo.toml"))?;
-    cargo_file.write_all(
-        format!(
+    write_file(
+        &workspace_dir.join("Cargo.toml"),
+        &format!(
             include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/template/Cargo.toml")),
             members = format_args!("\"{name}\""),
-        )
-        .as_bytes(),
+        ),
     )?;
 
+    create_macros_crate(&workspace_dir)?;
     create_driver(&workspace_dir, &lib_name, name)?;
 
     Ok(())

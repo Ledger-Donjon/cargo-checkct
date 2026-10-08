@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{path::PathBuf, time::Duration};
+use std::{path::PathBuf, thread, time::Duration};
 
 use anyhow::{Result, bail};
 use clap::{Parser, Subcommand};
@@ -14,7 +14,7 @@ mod run;
 
 use add::add_driver;
 use init::init_workspace;
-use run::run_binsec;
+use run::{Check, Options, Status, overall_status, run_binsec, summarize};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -26,33 +26,54 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Create a checkct workspace, with a first verification driver
     Init {
-        /// Set the path to the directory in which to place the checkct workspace,
+        /// Set the path to the library in which to place the checkct workspace,
         /// if it is different from the working directory.
         #[arg(short, long, value_name = "PATH")]
         dir: Option<PathBuf>,
 
         /// Sets the name of the first constant-time verification driver to be created
-        /// in the newly created chechct workspace. Defaults to "driver" if not set.
+        /// in the newly created checkct workspace. Defaults to "driver" if not set.
         #[arg(short, long, value_name = "NAME")]
         name: Option<String>,
     },
+    /// Build the verification drivers, and verify them with binsec
     Run {
         /// Set the path to the target workspace (containing the checkct directory),
         /// if it is not in the working directory.
         #[arg(short, long, value_name = "PATH")]
         dir: Option<PathBuf>,
 
-        /// Set a timeout in seconds. If not set, defaults to 10 minutes (600 seconds).
-        #[arg(short, long, value_name = "SECONDS")]
-        timeout: Option<u64>,
+        /// Set a timeout in seconds, for the verification of each entrypoint.
+        #[arg(short, long, value_name = "SECONDS", default_value_t = 600)]
+        timeout: u64,
 
         /// Do not raise an error if binsec cannot conclude on the tested implementation.
         #[arg(long, action)]
         skip_unknown: bool,
+
+        /// Constant-time checks to perform.
+        #[arg(
+            long,
+            value_name = "CHECKS",
+            value_delimiter = ',',
+            default_value = "control-flow,memory-access"
+        )]
+        checks: Vec<Check>,
+
+        /// Keep exploring after the first leak of each entrypoint, to report all the leaky
+        /// instructions. This can take much longer.
+        #[arg(long, action)]
+        all_leaks: bool,
+
+        /// Number of binsec analyses to run in parallel. Defaults to the number of CPUs.
+        #[arg(short, long, value_name = "N")]
+        jobs: Option<usize>,
     },
+    /// Add a verification driver to an existing checkct workspace
     Add {
-        /// Set the path to the checkct workspace,
+        /// Set the path to the library containing the checkct workspace,
         /// if it is different from the working directory.
         #[arg(short, long, value_name = "PATH")]
         dir: Option<PathBuf>,
@@ -64,7 +85,12 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    let cli = Cli::parse();
+    // When invoked as `cargo checkct`, cargo passes "checkct" as the first argument
+    let mut args = std::env::args_os().collect::<Vec<_>>();
+    if args.get(1).is_some_and(|arg| arg == "checkct") {
+        args.remove(1);
+    }
+    let cli = Cli::parse_from(args);
 
     match cli.command {
         Command::Init { dir, name } => {
@@ -76,19 +102,35 @@ fn main() -> Result<()> {
             dir,
             timeout,
             skip_unknown,
+            checks,
+            all_leaks,
+            jobs,
         } => {
             let dir = dir.unwrap_or(std::env::current_dir()?).join("checkct");
-            let timeout = timeout.unwrap_or(600);
-            match run_binsec(&dir, Duration::from_secs(timeout))? {
-                run::Status::Secure => {
+            let options = Options {
+                timeout: Duration::from_secs(timeout),
+                checks,
+                all_leaks,
+                jobs: jobs.unwrap_or_else(|| {
+                    thread::available_parallelism().map_or(1, |jobs| jobs.get())
+                }),
+            };
+            let reports = run_binsec(&dir, &options)?;
+            summarize(&reports)?;
+            match overall_status(&reports) {
+                Status::Secure => {
                     println!("SECURE");
                     Ok(())
                 }
-                run::Status::Insecure => {
+                Status::Insecure => {
                     println!("INSECURE");
                     bail!("Insecure code!")
                 }
-                run::Status::Unknown => {
+                Status::Error => {
+                    println!("ERROR");
+                    bail!("Some drivers could not be verified!")
+                }
+                Status::Unknown => {
                     println!("UNKNOWN");
                     if skip_unknown {
                         Ok(())

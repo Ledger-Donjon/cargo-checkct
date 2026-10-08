@@ -1,5 +1,5 @@
 [toolchain]
-channel = "nightly"
-targets = ["thumbv7em-none-eabihf", "riscv32imac-unknown-none-elf", "x86_64-unknown-linux-gnu"]
+# Pinned so that driver builds are reproducible, since they rely on the unstable `-Zbuild-std`
+channel = "nightly-2026-10-06"
 profile = "minimal"
-components = ["rustfmt", "rust-src"]
+components = ["rust-src"]

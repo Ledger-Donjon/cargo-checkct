@@ -6,29 +6,40 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  linux-amd64:
+  linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.3
-      - name: rustup
-        run: |
-          rustup update --no-self-update nightly
-          rustup component add --toolchain nightly rust-src
-          rustup default nightly
-      - name: install binsec
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgmp-dev gcc g++ opam
-          opam init -y
-          opam install -y dune dune-site menhir grain_dypgen ocamlgraph zarith toml bitwuzla
-          eval $(opam env)
-          git clone --branch 0.10.0 https://github.com/binsec/binsec
-          git clone --branch 0.0.10 https://github.com/binsec/unisim_archisec
-          pushd unisim_archisec && dune build @install && dune install && popd
-          pushd binsec && dune build @install && dune install && popd
-      - name: run tests
-        run: eval $(opam env) && cargo test
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install binsec and cargo-checkct
+        uses: ./
+        with:
+          setup-only: true
+      - name: Install the Rust toolchain of the checkct workspace template
+        working-directory: template
+        run: rustup toolchain install
+      - name: Run tests
+        run: cargo test
+
+  # The workspace management commands do not require binsec
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Run tests
+        run: cargo test --bins --test cli
+
+  # Run the action as users would, on one of the examples
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./
+        with:
+          directory: examples/chachapoly
